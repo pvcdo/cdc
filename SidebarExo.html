@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    .container {
+      padding: 15px;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h3 {
+      color: #202124;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #5f6368;
+    }
+    input[type="text"], input[type="date"], select {
+      width: calc(100% - 20px);
+      padding: 8px 10px;
+      margin-bottom: 15px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    input[type="text"]:focus, input[type="date"]:focus, select:focus {
+      border-color: #4285f4;
+      outline: none;
+      box-shadow: 0 0 0 1px #4285f4;
+    }
+    button {
+      background-color: #4285f4;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px; /* Ajuste o tamanho da fonte do botão */
+      width: 100%;
+      margin-top: 10px; /* Espaçamento entre botões e acima */
+    }
+    button:hover {
+      background-color: #357ae8;
+    }
+    button + button { /* Espaçamento entre botões consecutivos */
+        margin-top: 8px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .hidden {
+      display: none;
+    }
+    .info-display {
+      background-color: #e8f0fe;
+      border: 1px solid #c7d8f9;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #1a73e8;
+    }
+    .info-display strong {
+      color: #0d47a1;
+    }
+    #despachoText {
+      white-space: pre-wrap; /* Mantém quebras de linha e espaços */
+      word-wrap: break-word; /* Quebra palavras longas */
+      border: 1px solid #ccc;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      max-height: 300px; /* Altura máxima para rolagem */
+      overflow-y: auto; /* Adiciona barra de rolagem se o conteúdo for grande */
+      font-family: 'Courier New', monospace; /* Fonte monoespaçada para o texto do despacho */
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    #loadingSpinner {
+        display: none; /* Escondido por padrão */
+        border: 4px solid #f3f3f3; /* Light grey */
+        border-top: 4px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 2s linear infinite;
+        margin: 10px auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="inputForm">
+      <h3>Dados para Despacho de Exoneração</h3>
+      <div class="info-display">
+        <strong>Linha selecionada:</strong><br>
+        Profissional: <span id="prof_saiu_display"></span><br>
+        Cargo: <span id="cargo_display"></span> - Especialidade: <span id="especialidade_display"></span><br>
+        Lotação: <span id="unidade_display"></span><br>
+        </div>
+
+      <form id="despachoForm">
+        <div class="form-group">
+          <label for="impacto">Haverá impacto?</label>
+          <select id="impacto" name="impacto" onchange="toggleImpactoCcg()" required>
+            <option value="1">1 - Sem impacto</option>
+            <option value="2">2 - Com impacto</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden" id="ccgGroup">
+          <label for="impacto_ccg">Qual a CCG?</label>
+          <input type="text" id="impacto_ccg" name="impacto_ccg" placeholder="Informe a CCG">
+        </div>
+
+        <div class="form-group">
+          <label for="mat">Matrícula do profissional exonerado:</label> <input type="text" id="mat" name="mat" required>
+        </div>
+
+        <div class="form-group">
+          <label for="data">Data da exoneração:</label> <input type="date" id="data" name="data" required>
+        </div>
+
+        <div class="form-group">
+          <label for="inciso_sim">Informe o Inciso:</label>
+          <select id="inciso_sim" name="inciso_sim" onchange="toggleRepoDataf()" required>
+            <option value="">Selecione...</option> <option value="1">TEMPORÁRIO 2 ANOS - Inciso IV</option>
+            <option value="2">DEFINITIVO 2 ANOS - Inciso V</option>
+            <option value="3">TEMPORÁRIO 4 ANOS - Inciso VI</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden" id="repoDatafGroup">
+          <label for="repo_dataf">Data fim da reposição (para TEMPORÁRIO):</label>
+          <input type="date" id="repo_dataf" name="repo_dataf">
+        </div>
+
+        <div class="form-group">
+          <label for="plantao_sim">Informe caso haja plantão:</label>
+          <select id="plantao_sim" name="plantao_sim" required>
+            <option value="1">1 - NÃO SE APLICA</option>
+            <option value="2">2 - Plantões Dias de Semana</option>
+            <option value="3">3 - Plantões Fds</option>
+            <option value="4">4 - Plantões Dias de Semana + 1Fds</option>
+          </select>
+        </div>
+
+        <button type="submit" id="submitButton">Gerar Despacho</button>
+        <div id="loadingSpinner"></div>
+      </form>
+    </div>
+
+    <div id="despachoOutput" class="hidden">
+      <h3>Despacho Gerado</h3>
+      <pre id="despachoText"></pre>
+      <button onclick="copyDespachoText()">Copiar Texto</button>
+      <button onclick="google.script.host.close()">Fechar</button>
+    </div>
+  </div>
+
+  <script>
+    // This line injects the initialData directly into a JavaScript variable
+    // using Apps Script templating.
+    var initialData = JSON.parse('<?= initialData ?>'); 
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Popula os campos de exibição com os dados da linha selecionada
+      document.getElementById('prof_saiu_display').textContent = initialData.prof_saiu;
+      document.getElementById('cargo_display').textContent = initialData.cargo_cdc_achado;
+      document.getElementById('especialidade_display').textContent = initialData.especialidade_cdc_achado;
+      document.getElementById('unidade_display').textContent = initialData.unidade_achado;
+      // REMOVIDO: document.getElementById('inciso_display').textContent = initialData.inciso_novo_achado;
+
+      // Atualiza a visibilidade dos campos dependentes após carregar os dados
+      toggleImpactoCcg();
+      // Não chame toggleRepoDataf() aqui se a opção "Selecione..." for a padrão,
+      // pois ela deve aparecer apenas quando um tipo de inciso temporário for escolhido.
+      // A função será chamada pelo evento 'onchange' do select de inciso.
+
+      // Lida com o envio do formulário
+      document.getElementById('despachoForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Impede o envio padrão do formulário
+
+        var submitButton = document.getElementById('submitButton');
+        var loadingSpinner = document.getElementById('loadingSpinner');
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'Gerando...';
+        loadingSpinner.style.display = 'block'; // Mostra o spinner
+
+        var formData = {
+          impacto: document.getElementById('impacto').value,
+          impacto_ccg: document.getElementById('impacto_ccg').value,
+          mat: document.getElementById('mat').value,
+          data: document.getElementById('data').value,
+          repo_dataf: document.getElementById('repo_dataf').value,
+          plantao_sim: document.getElementById('plantao_sim').value,
+          inciso_sim: document.getElementById('inciso_sim').value // NOVO: Coleta o valor selecionado para o inciso
+        };
+
+        // Chama a função Apps Script no servidor
+        google.script.run
+          .withSuccessHandler(function(despachoText) { // despachoText é o texto retornado do GAS
+            document.getElementById('despachoText').textContent = despachoText;
+            document.getElementById('inputForm').classList.add('hidden'); // Esconde o formulário de entrada
+            document.getElementById('despachoOutput').classList.remove('hidden'); // Mostra a área do despacho
+
+            submitButton.disabled = false;
+            submitButton.textContent = 'Gerar Despacho';
+            loadingSpinner.style.display = 'none'; // Esconde o spinner
+          })
+          .withFailureHandler(function(error) {
+            alert('Erro: ' + error.message);
+            // Reabilita o botão em caso de erro
+            submitButton.disabled = false;
+            submitButton.textContent = 'Gerar Despacho';
+            loadingSpinner.style.display = 'none'; // Esconde o spinner
+          })
+          .processarDadosExoneracaoSidebar(formData, JSON.stringify(initialData)); // Changed function call to processarDadosExoneracaoSidebar
+      });
+    });
+
+    function toggleImpactoCcg() {
+      var impactoSelect = document.getElementById('impacto');
+      var ccgGroup = document.getElementById('ccgGroup');
+      if (impactoSelect.value === '2') { // Com impacto
+        ccgGroup.classList.remove('hidden');
+        document.getElementById('impacto_ccg').setAttribute('required', 'required');
+      } else {
+        ccgGroup.classList.add('hidden');
+        document.getElementById('impacto_ccg').removeAttribute('required');
+        document.getElementById('impacto_ccg').value = ''; // Limpa o campo se escondido
+      }
+    }
+
+    function toggleRepoDataf() {
+      var incisoSelect = document.getElementById('inciso_sim'); // Pega o novo campo de seleção do inciso
+      var repoDatafGroup = document.getElementById('repoDatafGroup');
+      
+      // Mostra o campo de data fim da reposição apenas para as opções TEMPORÁRIO
+      if (incisoSelect.value === '1' || incisoSelect.value === '3') { // 1 = TEMPORÁRIO 2 ANOS (Inciso IV), 3 = TEMPORÁRIO 4 ANOS (Inciso VI)
+        repoDatafGroup.classList.remove('hidden');
+        document.getElementById('repo_dataf').setAttribute('required', 'required');
+      } else {
+        repoDatafGroup.classList.add('hidden');
+        document.getElementById('repo_dataf').removeAttribute('required');
+        document.getElementById('repo_dataf').value = ''; // Limpa o campo se escondido
+      }
+    }
+
+    function copyDespachoText() {
+      var despachoElement = document.getElementById('despachoText');
+      
+      var range = document.createRange();
+      range.selectNodeContents(despachoElement);
+      
+      var selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      try {
+        document.execCommand('copy');
+        alert('Despacho copiado para a área de transferência!');
+      } catch (err) {
+        alert('Erro ao copiar o texto: ' + err);
+      } finally {
+        selection.removeAllRanges();
+      }
+    }
+  </script>
+</body>
+</html>
